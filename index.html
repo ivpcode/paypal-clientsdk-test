@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- Ensures optimal rendering on mobile devices -->
+
+    <!-- UIkit CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.15.18/dist/css/uikit.min.css" />
+
+    <!-- UIkit JS -->
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.15.18/dist/js/uikit.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.15.18/dist/js/uikit-icons.min.js"></script>    
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.2.1/axios.min.js"></script>
+
+    <script src="./paypal_lib.js"></script>
+  </head>
+
+  <body>
+   
+    <div class="uk-container-small">
+        <button class="purchase_btn" type="button">Compra ora!</button>
+    </div>
+
+    <div id="payapl-payment-dialog" uk-modal>
+        <div class="uk-modal-dialog uk-modal-body">
+            <h2 class="uk-modal-title">Dialogo di pagamento</h2>            
+            <div id="paypal-button-container"></div>
+        </div>
+    </div>
+
+  
+
+    <script>
+		
+		const client_id = "AbOe348VDIwiBu0VAmTPqkkDyw9SfXDa_9a9g1NPnr9E4JkHiwCrR81A_hyxg0pvs2AW-RBU80J3v9vo"
+		const merchant_id = "XB8P386GTFLBQ"
+
+		const api_base_addr = "https://ivpcode-improved-space-train-xp7q6wrwq5pf664w-12001.preview.app.github.dev"
+
+		document.addEventListener("DOMContentLoaded", async () => {
+
+			document.querySelector(".purchase_btn").onclick = async ()=> {
+
+				try {			
+					let modal = window.UIkit.modal("#payapl-payment-dialog");
+					document.querySelector("#paypal-button-container").innerHTML = ""
+
+					modal.show()
+
+					try {
+						let ret = await axios.post(api_base_addr+"/api/purchase/create", { "product_code": "PRODUCT_CODE" })
+						
+						let order_amount = ret.data.order_amount
+						let order_description = ret.data.order_description
+						let order_hash = ret.data.order_hash
+
+						let init_ok = await PayPalLib.Init(client_id,merchant_id)
+						if (init_ok == false)
+							throw "PayPalLib.Init failed"
+
+						let result = await PayPalLib.Checkout("paypal-button-container",order_hash,order_amount,order_description)
+						
+						console.log(result)
+						
+						ret = await axios.post(api_base_addr+"/api/purchase/confirm", result.data)
+					}
+					catch(Ex) {
+						console.error(Ex)
+					}								
+					modal.hide();
+				}
+				catch (Ex) {
+					console.error(Ex)
+				}
+
+			}
+
+		})
+
+    </script>
+  </body>
+</html>
