@@ -18,6 +18,18 @@ app.post ('/', async (req, res) => {
 const paypal_app_client_id = "AbOe348VDIwiBu0VAmTPqkkDyw9SfXDa_9a9g1NPnr9E4JkHiwCrR81A_hyxg0pvs2AW-RBU80J3v9vo"
 const paypal_app_secret = "EPracwYRGnoqxwX90dvJjhyaX0ugBdkV1SL3_fFu9rPqRuqVGY6wIB6cON_UFYPX5iJxuO14tlbETMLH"
 
+
+app.post ('/api/purchase/create', async (req, res) => {
+
+	let product_code = req.body.product_code	
+
+	res.json({
+		order_hash: "ORDER_HASH_"+(new Date()).getTime(),
+		order_amount: 10,
+		order_description: "Order description"
+	})
+})
+
 app.post ('/api/purchase/confirm', async (req, res) => {
 
 	let payapal_oder_id = req.body.id
@@ -49,17 +61,6 @@ app.post ('/api/purchase/confirm', async (req, res) => {
 		console.error(Ex)
 	}
 	res.send(200)
-})
-
-app.post ('/api/purchase/create', async (req, res) => {
-
-	let product_code = req.body.product_code	
-
-	res.json({
-		order_hash: "ORDER_HASH_"+(new Date()).getTime(),
-		order_amount: 10,
-		order_description: "Order description"
-	})
 })
 
 app.listen(12001)
